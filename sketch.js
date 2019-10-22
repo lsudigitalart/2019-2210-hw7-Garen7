@@ -1,5 +1,5 @@
 //branches
-const SPREAD = 100
+const SPREAD = 1000
 const FORKS = 1
 let branches = []
 let head
@@ -8,7 +8,7 @@ let oldHeadY = 0
 
 //time
 const SECOND = 60 //frames per second
-const TEMPO = 80
+const TEMPO = 30
 const BEAT = SECOND**2/TEMPO
 let time = 0
 
@@ -20,12 +20,12 @@ class branch{
         this.y = y
         this.children = []
         this.fresh = true
+        this.alpha = 0
     }
 
     split(){
         let newX = (random(SPREAD)+random(SPREAD))/2 - SPREAD/2 + this.x
         let newY = (random(SPREAD)+random(SPREAD))/2 - SPREAD/2 + this.y
-        line(this.x, this.y, newX, newY)
 
         let newBranch = new branch(newX, newY)
         this.children.push(newBranch)
@@ -34,6 +34,8 @@ class branch{
 
     drawLines(){
         for(var c of this.children){
+            stroke(160, 120, 85, c.alpha)
+            c.alpha += 255/BEAT
             line(c.x, c.y, this.x, this.y)
         }
     }
@@ -55,9 +57,8 @@ function setup(){
 }
 
 function draw(){
-    background(256)
-    translate(width/2 + map(time%BEAT, 0, BEAT, oldHeadX, head.x), height/2 - map(time%BEAT, 0, BEAT, oldHeadY, head.y))
-    //scale(1+time*.01)
+    background(212, 185, 150)
+    translate(width/2 - map((time-1)%BEAT, 0, BEAT, oldHeadX, head.x), height/2 - map((time-1)%BEAT, 0, BEAT, oldHeadY, head.y))
 
     if(time%BEAT == 0){
         for(var b of branches){
@@ -71,8 +72,8 @@ function draw(){
                 }
             }
             //if not then remove it
-            else{
-                branches = branches.filter(value => b == value)
+            else{//javascript problem, not my fault
+                //branches = branches.filter(value => b == value)
             }
         }
 
@@ -80,6 +81,9 @@ function draw(){
         oldHeadX = head.x
         oldHeadY = head.y
         head = head.split()
+        branches.push(head)
+        //slight bias to avoid screen clutter
+        head.y+= SPREAD/8
     }
 
     for(var b of branches){
